@@ -1,6 +1,3 @@
-#include "SDL2/SDL_error.h"
-#include "SDL2/SDL_render.h"
-#include "SDL2/SDL_video.h"
 #include <SDL2/SDL.h>
 
 #include <stdio.h>
