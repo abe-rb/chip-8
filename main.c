@@ -1,3 +1,4 @@
+#include "chip8.h"
 #include <SDL2/SDL.h>
 
 #include <stdio.h>
@@ -36,6 +37,9 @@ int main(int argc, char **argv) {
 
     SDL_Event event;
     bool quit = false;
+
+    cpu c;
+    chip8_init(&c);
 
     while (!quit) {
         while (SDL_PollEvent(&event) != 0) {
