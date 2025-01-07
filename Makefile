@@ -2,7 +2,7 @@ CC = gcc
 CFLAGS = -Wall -std=c99 -g
 LDLFLAGS = -lSDL2
 
-SRC = main.c chip8.c
+SRC = main.c chip8.c display.c
 OBJ = $(SRC:.c=.o)
 EXEC = chip8
 
