@@ -1,14 +1,27 @@
 #include "chip8.h"
 #include "display.h"
 
+#include <SDL2/SDL.h>
+
 #include <stdio.h>
 #include <stdbool.h>
 
-#include <SDL2/SDL.h>
 
 int main(int argc, char **argv) {
+    if (argc < 2) {
+        printf("usage: chip8 <path_to_rom>\n");
+        return 1;
+    }
+
+    FILE *rom = fopen(argv[1], "rb");
+    if (!rom) {
+        fprintf(stderr, "error: failed to open rom\n");
+        return 1;
+    }
+
     cpu c;
     chip8_init(&c);
+    chip8_load_rom(&c, rom, argv[1]);
 
     display_init();
 
@@ -23,6 +36,7 @@ int main(int argc, char **argv) {
     }
 
     display_cleanup();
+    chip8_cleanup(rom);
 
     return 0;
 }

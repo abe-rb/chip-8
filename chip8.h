@@ -1,6 +1,7 @@
 #ifndef CHIP_8_H
 #define CHIP_8_H
 #include <stdint.h>
+#include <stdio.h>
 typedef struct cpu {
     uint8_t memory[4096];
     uint8_t Vx[16];
@@ -12,4 +13,6 @@ typedef struct cpu {
     uint16_t stack[16];
 } cpu;
 void chip8_init(cpu *c);
+void chip8_load_rom(cpu *c, FILE *rom, char *file_name);
+void chip8_cleanup(FILE *rom);
 #endif

@@ -2,6 +2,9 @@
 
 #include <stdint.h>
 #include <string.h>
+#include <stdlib.h>
+#include <stdio.h>
+#include <sys/stat.h>
 
 
 const uint8_t fontset[80] = {
@@ -27,4 +30,22 @@ void chip8_init(cpu *c) {
     memset(c, 0, sizeof(cpu));
     c->PC = 0x200;
     memcpy(c->memory + 0x50, fontset, sizeof(fontset));
+}
+
+void chip8_load_rom(cpu *c, FILE *rom, char *file_name) {
+    struct stat s;
+    if (stat(file_name, &s)) {
+        fprintf(stderr, "error: failed getting file size\n");
+        exit(1);
+    }
+
+    size_t program_size = fread(c->memory + 0x200, 1, sizeof(c->memory) - 0x200, rom);
+    if (program_size != s.st_size) {
+        fprintf(stderr, "error: failed loading rom\n");
+        exit(1);
+    }
+}
+
+void chip8_cleanup(FILE *rom) {
+    fclose(rom);
 }
