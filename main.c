@@ -33,6 +33,7 @@ int main(int argc, char **argv) {
                 quit = true;
             }
         }
+        chip8_emulate_cycle(&c);
     }
 
     display_cleanup();

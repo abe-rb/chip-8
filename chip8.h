@@ -1,5 +1,6 @@
 #ifndef CHIP_8_H
 #define CHIP_8_H
+#include "display.h"
 #include <stdint.h>
 #include <stdio.h>
 typedef struct cpu {
@@ -11,8 +12,10 @@ typedef struct cpu {
     uint16_t PC;
     uint8_t SP;
     uint16_t stack[16];
+    uint8_t screen[SCREEN_WIDTH * SCREEN_HEIGHT];
 } cpu;
 void chip8_init(cpu *c);
 void chip8_load_rom(cpu *c, FILE *rom, char *file_name);
 void chip8_cleanup(FILE *rom);
+void chip8_emulate_cycle(cpu *c);
 #endif
