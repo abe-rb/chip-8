@@ -64,15 +64,48 @@ void chip8_emulate_cycle(cpu *c) {
     switch (op & 0xf000) {
         case 0x0000:
             switch (op & 0x00ff) {
+                // ret
+                case 0x00ee:
+                    c->PC = c->stack[c->SP];
+                    c->SP--;
                 // clear screen
                 case 0x00e0:
                 display_clear();
                     break;
             }
             break;
+
         // jump
         case 0x1000:
             c->PC = 0x0fff & op;
+            break;
+
+        // call addr
+        case 0x2000:
+            c->SP++;
+            c->stack[c->SP] = c->PC;
+            c->PC = op & 0x0fff;
+            break;
+
+        // skip if equal
+        case 0x3000:
+            if (!(c->Vx[x] ^ (op & 0x00ff))) {
+                c->PC += 2;
+            }
+            break;
+
+        // skip not equal
+        case 0x4000:
+            if ((c->Vx[x] ^ (op & 0x00ff))) {
+                c->PC += 2;
+            }
+            break;
+
+        // skip vx == vy
+        case 0x5000:
+            if (!(c->Vx[x] ^ c->Vx[y])) {
+                c->PC += 2;
+            }
             break;
 
         // set register vx
@@ -85,9 +118,86 @@ void chip8_emulate_cycle(cpu *c) {
             c->Vx[x] += op & 0x00ff;
             break;
 
+        case 0x8000:
+            switch (op & 0x000f) {
+                // ld
+                case 0x0000:
+                    c->Vx[x] = c->Vx[y];
+                    break;
+
+                // or
+                case 0x0001:
+                    c->Vx[x] = c->Vx[x] | c->Vx[y];
+                    break;
+
+                // and
+                case 0x0002:
+                    c->Vx[x] = c->Vx[x] & c->Vx[y];
+                    break;
+
+                // xor
+                case 0x0003:
+                    c->Vx[x] = c->Vx[x] ^ c->Vx[y];
+                    break;
+
+                // add
+                case 0x0004:
+                    if (c->Vx[x] + c->Vx[y] > 0xff) {
+                        c->Vx[0x0f] = 1;
+                    } else {
+                        c->Vx[0x0f] = 0;
+                    }
+                    c->Vx[x] = c->Vx[x] + c->Vx[y];
+                    break;
+
+                // sub vx-vy
+                case 0x0005:
+                    if (c->Vx[x] > c->Vx[y]) {
+                        c->Vx[0x0f] = 1;
+                    } else {
+                        c->Vx[0x0f] = 0;
+                    }
+                    c->Vx[x] = c->Vx[x] - c->Vx[y];
+                    break;
+
+                // shift right
+                case 0x0006:
+                    c->Vx[0x0f] = c->Vx[x] & 0x01;
+                    c->Vx[x] >>= 1;
+                    break;
+
+                // sub vy-vx
+                case 0x0007:
+                    if (c->Vx[y] > c->Vx[x]) {
+                        c->Vx[0x0f] = 1;
+                    } else {
+                        c->Vx[0x0f] = 0;
+                    }
+                    c->Vx[x] = c->Vx[y] - c->Vx[x];
+                    break;
+
+                // shift left
+                case 0x000e:
+                    c->Vx[0x0f] = (c->Vx[x] & 0x80) >> 7;
+                    c->Vx[x] <<= 1;
+                    break;
+            }
+
+        // skip Vx != Vy
+        case 0x9000:
+            if (c->Vx[x] ^ c->Vx[y]) {
+                c->PC +=  2;
+            }
+            break;
+
         // set index register I
         case 0xa000:
             c->I = op & 0x0fff;
+            break;
+
+        // jump v0 + addr
+        case 0xb000:
+            c->PC = c->Vx[0] + (op & 0x0fff);
             break;
 
         // draw
@@ -110,7 +220,7 @@ void chip8_emulate_cycle(cpu *c) {
             break;
         }
         default:
-            printf("invalid opcode\n");
+            printf("invalid opcode %x\n", op);
     }
     usleep(1000);
 }
