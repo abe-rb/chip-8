@@ -267,6 +267,7 @@ void chip8_emulate_cycle(cpu *c) {
                     }
                     break;
                 }
+                break;
 
                 // ld vx [i]
                 case 0x0065: {
@@ -275,6 +276,7 @@ void chip8_emulate_cycle(cpu *c) {
                     }
                     break;
                 }
+                break;
             }
             break;
 
