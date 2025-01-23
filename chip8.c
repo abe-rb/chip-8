@@ -151,12 +151,12 @@ void chip8_emulate_cycle(cpu *c) {
 
                 // sub vx-vy
                 case 0x0005:
+                    c->Vx[x] -= c->Vx[y];
                     if (c->Vx[x] > c->Vx[y]) {
                         c->Vx[0x0f] = 1;
                     } else {
                         c->Vx[0x0f] = 0;
                     }
-                    c->Vx[x] -= c->Vx[y];
                     break;
 
                 // shift right
@@ -167,12 +167,12 @@ void chip8_emulate_cycle(cpu *c) {
 
                 // sub vy-vx
                 case 0x0007:
+                    c->Vx[x] = c->Vx[y] - c->Vx[x];
                     if (c->Vx[y] > c->Vx[x]) {
                         c->Vx[0x0f] = 1;
                     } else {
                         c->Vx[0x0f] = 0;
                     }
-                    c->Vx[x] = c->Vx[y] - c->Vx[x];
                     break;
 
                 // shift left
