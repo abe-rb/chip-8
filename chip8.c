@@ -68,6 +68,7 @@ void chip8_emulate_cycle(cpu *c) {
                 case 0x00ee:
                     c->PC = c->stack[c->SP];
                     c->SP--;
+                break;
                 // clear screen
                 case 0x00e0:
                 display_clear();
@@ -147,7 +148,7 @@ void chip8_emulate_cycle(cpu *c) {
                     } else {
                         c->Vx[0x0f] = 0;
                     }
-                    c->Vx[x] = c->Vx[x] + c->Vx[y];
+                    c->Vx[x] += c->Vx[y];
                     break;
 
                 // sub vx-vy
@@ -157,7 +158,7 @@ void chip8_emulate_cycle(cpu *c) {
                     } else {
                         c->Vx[0x0f] = 0;
                     }
-                    c->Vx[x] = c->Vx[x] - c->Vx[y];
+                    c->Vx[x] -= c->Vx[y];
                     break;
 
                 // shift right
@@ -182,6 +183,7 @@ void chip8_emulate_cycle(cpu *c) {
                     c->Vx[x] <<= 1;
                     break;
             }
+            break;
 
         // skip Vx != Vy
         case 0x9000:
@@ -198,6 +200,11 @@ void chip8_emulate_cycle(cpu *c) {
         // jump v0 + addr
         case 0xb000:
             c->PC = c->Vx[0] + (op & 0x0fff);
+            break;
+
+        // random
+        case 0xc000:
+            c->Vx[x] = arc4random_uniform(256) & (op & 0x00ff);
             break;
 
         // draw
@@ -219,6 +226,60 @@ void chip8_emulate_cycle(cpu *c) {
             display_draw(c->screen);
             break;
         }
+        break;
+
+        case 0xf000:
+            switch (op & 0x00ff) {
+                // ld vx dt
+                case 0x0007:
+                    c->Vx[x] = c->DT;
+                    break;
+
+                // ld dt vx
+                case 0x0015:
+                    c->DT = c->Vx[x];
+                    break;
+
+                // ld st vx
+                case 0x0018:
+                    c->ST = c->Vx[x];
+                    break;
+
+                // add i vx
+                case 0x001e:
+                    c->I = c->I + c->Vx[x];
+                    break;
+
+                // ld sprite
+                case 0x0029:
+                    c->I = c->memory[c->Vx[x] + 50];
+                    break;
+
+                // ld b vx
+                case 0x0033:
+                    c->memory[c->I] = c->Vx[x] / 100;
+                    c->memory[c->I+1] = (c->Vx[x] / 10) % 10;
+                    c->memory[c->I+2] = c->Vx[x] % 10;
+                    break;
+
+                // ld [i] vx
+                case 0x0055: {
+                    for (int i = 0; i <= x; i++) {
+                        c->memory[c->I+i] = c->Vx[i];
+                    }
+                    break;
+                }
+
+                // ld vx [i]
+                case 0x0065: {
+                    for (int i = 0; i <= x; i++) {
+                        c->Vx[i] = c->memory[c->I+i];
+                    }
+                    break;
+                }
+            }
+            break;
+
         default:
             printf("invalid opcode %x\n", op);
     }
