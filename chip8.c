@@ -142,14 +142,12 @@ void chip8_emulate_cycle(cpu *c) {
                     break;
 
                 // add
-                case 0x0004:
-                    if (c->Vx[x] + c->Vx[y] > 0xff) {
-                        c->Vx[0x0f] = 1;
-                    } else {
-                        c->Vx[0x0f] = 0;
-                    }
+                case 0x0004: {
+                    uint8_t carry = (c->Vx[x] + c->Vx[y] > 0xff) ? 1 : 0;
                     c->Vx[x] += c->Vx[y];
-                    break;
+                    c->Vx[0x0f] = carry;
+                }
+                break;
 
                 // sub vx-vy
                 case 0x0005:
