@@ -226,6 +226,25 @@ void chip8_emulate_cycle(cpu *c) {
         }
         break;
 
+        // keypad
+        case 0xe000:
+            switch (op & 0x00ff) {
+                // skip if pressed
+                case 0x009e:
+                    if (c->keypad[c->Vx[x]]) {
+                        c->PC += 2;
+                    }
+                    break;
+
+                // skip if not pressed
+                case 0x00a1:
+                    if (!c->keypad[c->Vx[x]]) {
+                        c->PC += 2;
+                    }
+                    break;
+            }
+            break;
+
         case 0xf000:
             switch (op & 0x00ff) {
                 // ld vx dt
